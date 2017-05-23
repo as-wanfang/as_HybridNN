@@ -12,26 +12,6 @@ import pandas as pd
 # Download images and labels into mnist.test (10K images+labels) and mnist.train (60K images+labels)
 mnist = read_data_sets("data", one_hot=True, reshape=False, validation_size=0)
 
-# neural network structure for this sample:
-#
-# · · · · · · · · · ·      (input data 1 - image, 1-deep)       X1 [batch, 28, 28, 1]
-# @ @ @ @ @ @ @ @ @ @   -- conv. layer 5x5x1=>4 stride 1        W1 [5, 5, 1, 4]        B1 [4]
-# ∶∶∶∶∶∶∶∶∶∶∶∶∶∶∶∶∶∶∶                                           Y1 [batch, 28, 28, 4]
-#   @ @ @ @ @ @ @ @     -- conv. layer 5x5x4=>8 stride 2        W2 [5, 5, 4, 8]        B2 [8]
-#   ∶∶∶∶∶∶∶∶∶∶∶∶∶∶∶                                             Y2 [batch, 14, 14, 8]
-#     @ @ @ @ @ @       -- conv. layer 4x4x8=>12 stride 2       W3 [4, 4, 8, 12]       B3 [12]
-#     ∶∶∶∶∶∶∶∶∶∶∶                                               Y3 [batch, 7, 7, 12] => reshaped to YY [batch, 7*7*12]
-
-#                           (input data 2 - indicator, vector)  X2  [batch, 1]
-#                                                               W21 [1, 12]
-#                                                               Y21 [batch, 7, 7, 12] (tiling)
-#                                                               Y31 = Y3 + Y21
-
-#      \x/x\x\x/        -- fully connected layer (relu)         W4 [7*7*12, 200]       B4 [200]
-#       · · · ·                                                 Y4 [batch, 200]
-#       \x/x\x/         -- fully connected layer (softmax)      W5 [200, 2]           B5 [2]
-#        · · ·                                                  Y [batch, 2]
-
 # input X: 28x28 grayscale images, the first dimension (None) will index the images in the mini-batch
 X = tf.placeholder(tf.float32, [None, 28, 28, 1])
 X2 = tf.placeholder(tf.float32, [None, 1])
@@ -102,7 +82,7 @@ sess.run(init)
 saver = tf.train.Saver()
 
 # Setting up the indicators
-checkpoint_path = './checkpoint_2-3'
+checkpoint_path = './checkpoint_32'
 if not os.path.isdir(checkpoint_path):
     os.mkdir(checkpoint_path)
 
@@ -117,10 +97,12 @@ def generate_data(batch_X, batch_Y):
     batch_X2_rep = np.tile( np.arange(0,n).reshape([1,n]), [l,1] ).flatten('F').reshape([l*n,1])
     batch_id = np.argmax( batch_Y, axis=1 ).reshape([l,1])
     batch_id_rep = np.tile(batch_id, [n,1])
+    
     # find the true indicator of each image
     batch_X2_rep_true = np.tile(
         np.array(list(map(lambda x: [k for k, v in indicators.items() if x in v], batch_id))) ,
         [n,1])
+    
     # generate the new labels including the conflict class
     batch_Y_rep = np.zeros((l*n,2+1))
     for i, match in zip(np.arange(l*n), batch_X2_rep_true==batch_X2_rep):
@@ -172,12 +154,7 @@ np.savez(checkpoint_path+'/accuracy', a_test=a_test, a_train=a_train, test_predi
 #calculate prediction accuracy
 y = np.argmax(mnist.test.labels, 1)
 
-checkpoint_path = './checkpoint_2-3'
-data = np.load(checkpoint_path+'/accuracy.npz')
-indicators = np.load(checkpoint_path+'/indicators.npy').item()
-n = len(indicators)
-a_test = data['a_test'] #[101,1]
-y_ = data['test_prediction'][np.argmax(a_test)] #[10000*n,11]
+y_ = test_prediction[np.argmax(a_test)] #[10000*n,11]
 
 cols = [ "Indicator_"+str(i) for i in range(n)]
 y_prediction = pd.DataFrame(np.zeros([10000, n]), columns=cols)
