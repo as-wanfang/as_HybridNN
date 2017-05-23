@@ -12,26 +12,6 @@ import pandas as pd
 # Download images and labels into mnist.test (10K images+labels) and mnist.train (60K images+labels)
 mnist = read_data_sets("data", one_hot=True, reshape=False, validation_size=0)
 
-# neural network structure for this sample:
-#
-# · · · · · · · · · ·      (input data 1 - image, 1-deep)       X1 [batch, 28, 28, 1]
-# @ @ @ @ @ @ @ @ @ @   -- conv. layer 5x5x1=>4 stride 1        W1 [5, 5, 1, 4]        B1 [4]
-# ∶∶∶∶∶∶∶∶∶∶∶∶∶∶∶∶∶∶∶                                           Y1 [batch, 28, 28, 4]
-#   @ @ @ @ @ @ @ @     -- conv. layer 5x5x4=>8 stride 2        W2 [5, 5, 4, 8]        B2 [8]
-#   ∶∶∶∶∶∶∶∶∶∶∶∶∶∶∶                                             Y2 [batch, 14, 14, 8]
-#     @ @ @ @ @ @       -- conv. layer 4x4x8=>12 stride 2       W3 [4, 4, 8, 12]       B3 [12]
-#     ∶∶∶∶∶∶∶∶∶∶∶                                               Y3 [batch, 7, 7, 12] => reshaped to YY [batch, 7*7*12]
-
-#                         (input data 2 - indicators, vector)   X2  [batch, 2] two-dimensional indicator
-#                                                               W21 [2, 12]
-#                                                               Y21 [batch, 7, 7, 12] (tiling)
-#                                                               Y31 = Y3 + Y21
-
-#      \x/x\x\x/        -- fully connected layer (relu)         W4 [7*7*12, 200]       B4 [200]
-#       · · · ·                                                 Y4 [batch, 200]
-#       \x/x\x/         -- fully connected layer (softmax)      W5 [200, 11]           B5 [11]
-#        · · ·                                                  Y [batch, 11]
-
 # input X: 28x28 grayscale images, the first dimension (None) will index the images in the mini-batch
 X = tf.placeholder(tf.float32, [None, 28, 28, 1])
 X2 = tf.placeholder(tf.float32, [None, 2])
@@ -102,18 +82,12 @@ sess.run(init)
 saver = tf.train.Saver()
 
 # Setting up the indicators
-checkpoint_path = './checkpoint_1-3'
+checkpoint_path = './checkpoint_31'
 if not os.path.isdir(checkpoint_path):
     os.mkdir(checkpoint_path)
 
-id = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-np.random.shuffle(id)
-n = 2 #n=2, 5, 10
-#indicators = {i:id[round(10/n*i):round(10/n*(i+1))] for i in range(n)} #4:n=2 #6:n=5 #7:n=10
-#indicators = {0:id[0:3], 1:id[3:10]}        #3
 indicators_0 = {0:[0,1,2,3,4], 1:[5,6,7,8,9]} #1
 indicators_1 = {0:[0,2,4,6,8], 1:[1,3,5,7,9]} #2
-#indicators = {0:[0], 1:[1,2,3,4,5,6,7,8,9]} #5
 l1 = len(indicators_0)
 l2 = len(indicators_1)
 n = l1 * l2
@@ -182,16 +156,7 @@ np.savez(checkpoint_path+'/accuracy', a_test=a_test, a_train=a_train, test_predi
 # calculate prediction accuracy
 y = np.argmax(mnist.test.labels, 1)
 
-dir = 'checkpoint_1-3'
-data = np.load(dir+'/accuracy.npz')
-indicators = np.load(dir+'/indicators.npz')
-indicators_0 = indicators['indicators_0'].item()
-indicators_1 = indicators['indicators_1'].item()
-l1 = len(indicators_0)
-l2 = len(indicators_1)
-n = l1 * l2
-a_test = data['a_test'] #[101,1]
-y_ = data['test_prediction'][np.argmax(a_test)] #[10000*n,11]
+y_ = test_prediction[np.argmax(a_test)] #[10000*n,11]
 
 # 0 = [0,0], 1=[1,0], 2=[0,1], 3=[1,1]
 indicators = {0:[0,2,4], 1:[6,8], 2:[1,3], 3:[5,7,9]}
