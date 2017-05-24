@@ -1,6 +1,6 @@
 # as_HybridNN
 
-Wan, F., 2017, as_HybridNN: MNIST for Logical Learning with A Hybrid Neural Network, Github, [https://github.com/as-wanfang/as_HybridNN]:https://github.com/as-wanfang/as_HybridNN, [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.582572.svg)](https://doi.org/10.5281/zenodo.582572).
+Wan, F., 2017, as_HybridNN: MNIST for Logical Learning with A Hybrid Neural Network, Github, https://github.com/as-wanfang/as_HybridNN, [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.582572.svg)](https://doi.org/10.5281/zenodo.582572).
 
 The *Hybrid Neural Network* (**HybridNN**) presented here intends to model a Logical Learning process by introducing an auxiliary input from the existing primary input or the original labels into the common Apparent Neural Networks (**ApparentNN**). To illustrate this process, the MNIST data is used in this repository as an example to demonstrate the design and use of such auxiliary indicators in a hybrid neural network.
 
