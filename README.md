@@ -1,5 +1,7 @@
 # as_HybridNN
 
+Wan, F., 2017, as_HybridNN: MNIST for Logical Learning with A Hybrid Neural Network, Github, [https://github.com/as-wanfang/as_HybridNN]:https://github.com/as-wanfang/as_HybridNN, [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.582572.svg)](https://doi.org/10.5281/zenodo.582572).
+
 The *Hybrid Neural Network* (**HybridNN**) presented here intends to model a Logical Learning process by introducing an auxiliary input from the existing primary input or the original labels into the common Apparent Neural Networks (**ApparentNN**). To illustrate this process, the MNIST data is used in this repository as an example to demonstrate the design and use of such auxiliary indicators in a hybrid neural network.
 
 The general structure of the HybrdNN is illustrated as below, where a set of *Auxiliary Input* is generated through digging the underneath knowledge buried in the label data. Such auxilary information is extracted as the indicators, a.k.a. the hints, to suggest a logical lable given a primary input. During the training process, the combinations of a primary input with all indicators are learned by the HybridNN as the logical knowledge. This process provides a logical learning of the knowledge in the data, including the apparent knowledge and the underneath logic.
